@@ -1,5 +1,6 @@
 from utils import *
 
+
 # generate network graphs
 G1 = network_generator(7, 9)
 G2 = network_generator(4, 5)
