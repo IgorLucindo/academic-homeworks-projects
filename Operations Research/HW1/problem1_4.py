@@ -35,11 +35,11 @@ model.addConstrs((sum(x[j, i] for j in list(G.predecessors(i))) == sum(x[i, j] f
                  for i in nodes_minus_st), name = 'c2')
 
 
-# # solve
+# solve
 model.optimize()
 model.write("primal_maxflow.lp")
 
-# # print results
+# print results
 print('Objective function value: %f' % model.objVal)
 for v in model.getVars():
     print('%s: %g' % (v.varName, v.x))
