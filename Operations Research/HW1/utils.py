@@ -29,6 +29,13 @@ def network_generator(n, m):
     # transform to a directed graph
     G = G.to_directed()
 
+    # remove in-flow arcs to s and out-flow arcs to t
+    for i in list(G.neighbors('s')):
+        G.remove_edge(i, 's')
+
+    for i in list(G.neighbors('t')):
+        G.remove_edge('t', i)
+
     # add capacities
     capacities = {e: random.randint(10, 20) for e in G.edges()}
     nx.set_edge_attributes(G, capacities, 'capacity')
