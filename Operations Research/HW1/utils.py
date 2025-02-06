@@ -23,39 +23,20 @@ def network_generator(n, m):
         if not nx.is_connected(G) or any(d == 1 for _, d in G.degree()):
             G.add_edge(u, v)
 
+    # transform G to a directed graph D
+    D = nx.DiGraph()
+    for u, v in G.edges:
+        D.add_edge(u, v)
+
     # rename s and t vertices
-    G = relabel_nodes_special(G, n)
-
-    # transform to a directed graph
-    G = G.to_directed()
-
-    # remove in-flow arcs to s and out-flow arcs to t
-    for i in list(G.neighbors('s')):
-        G.remove_edge(i, 's')
-
-    for i in list(G.neighbors('t')):
-        G.remove_edge('t', i)
+    D = nx.relabel_nodes(D, {0: 's', n-1: 't'})
 
     # add capacities
-    capacities = {e: random.randint(10, 20) for e in G.edges()}
-    nx.set_edge_attributes(G, capacities, 'capacity')
+    capacities = {e: random.randint(10, 20) for e in D.edges()}
+    nx.set_edge_attributes(D, capacities, 'capacity')
 
     # return the connected graph
-    return G
-
-
-# rename vertices to s and t
-def relabel_nodes_special(G, n):
-    node_s = next((node for node in G.nodes if G.degree[node] < n-1), None)
-    
-    # Create a mapping for relabeling
-    if node_s != None:
-        node_t = next((node for node in G.nodes if node != node_s and not G.has_edge(node, node_s)), None)
-        G = nx.relabel_nodes(G, {node_s: 's', node_t: 't'})
-    else:
-        G = nx.relabel_nodes(G, {0: 's', n-1: 't'})
-    
-    return G
+    return D
 
 
 # show graph
@@ -63,11 +44,11 @@ def show_graph(G):
     edge_labels = nx.get_edge_attributes(G, 'capacity')
     pos = nx.spring_layout(G)
 
+    # draw graph
+    nx.draw(G, pos, with_labels=True)
+
     # draw capacities
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
     
-    # draw graph
-    nx.draw_spring(G, with_labels=True)
-
     # show
     plt.show()

@@ -1,6 +1,3 @@
-# to fix:
-# G.predecessors(i) and G.successors(i) including all neighbors
-# directed graph with wrong capacities: c_12 != c_21
 import gurobipy as gp
 from gurobipy import GRB
 from utils import *
