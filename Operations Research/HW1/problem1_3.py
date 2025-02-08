@@ -1,4 +1,4 @@
-from utils import *
+from utils.graph_utils import *
 
 
 # generate network graphs
