@@ -88,9 +88,44 @@ def min_ship_solver(num_of_cargoes, DD, PO, PD, sailing_time, M):
 
     # add constraints
     model.addConstrs((DD[j] - DD[i] - sailing_time[PO[i]][PD[i]] - sailing_time[PO[j]][PD[i]] >= M*(x[s, i] + x[s, j] - 2)
-                    for i in C for j in C if j > i for s in S), name='c1')
+                      for i in C for j in C if j > i for s in S), name='c1')
     model.addConstrs((gp.quicksum(x[s, i] for s in S) == 1 for i in C), name = 'c2')
     model.addConstrs((x[s, i] <= y[s] for i in C for s in S), name = 'c3')
+
+    # solve
+    model.optimize()
+
+    # return model
+    return model
+
+
+# solve min total travel time
+def min_total_travel_time_solver(num_of_cargoes, DD, PO, PD, sailing_time, M):
+    # variables
+    S = range(num_of_cargoes)
+    C = range(num_of_cargoes)
+
+    # create model
+    model = gp.Model(name="min-ships")
+
+    # set variables
+    x = model.addVars(S, C, vtype=GRB.BINARY, name='x')
+    z = model.addVars(S, C, C, vtype=GRB.BINARY, name='z')
+    w = model.addVars(S, C, vtype=GRB.BINARY, name='w')
+
+    # define objective function
+    # obj_fn = gp.quicksum(sailing_time[PO[j]][PD[i]] * z[s, i, j] for s in S for i in C for j in C if j > i)
+    obj_fn = gp.quicksum(sailing_time[PO[j]][PD[i]] * z[s, i, j] for s in S for i in C for j in C if j > i) + gp.quicksum(sailing_time['Y'][PD[i]] * w[s, i] for s in S for i in C) + 21
+    model.setObjective(obj_fn, GRB.MINIMIZE)
+
+    # add constraints
+    model.addConstrs((DD[j] - DD[i] - sailing_time[PO[i]][PD[i]] - sailing_time[PO[j]][PD[i]] >= M*(x[s, i] + x[s, j] - 2)
+                      for i in C for j in C if j > i for s in S), name='c1')
+    model.addConstrs((gp.quicksum(x[s, i] for s in S) == 1 for i in C), name = 'c2')
+    model.addConstrs((x[s, i] + x[s, j] - 1 - gp.quicksum(x[s, k] for k in C if i < k < j) <= z[s, i, j]
+                      for i in C for j in C if j > i for s in S), name = 'c3')
+    model.addConstrs((x[s, i] - gp.quicksum(x[s, k] for k in C if k > i) <= w[s, i]
+                      for i in C for s in S), name = 'c4')
 
     # solve
     model.optimize()
