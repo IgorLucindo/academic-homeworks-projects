@@ -1,4 +1,4 @@
 # Academic Homeworks
 
-operations research:
+Operations Research:
 - homework 1: primal dual problem (max-flow/min-cut)
