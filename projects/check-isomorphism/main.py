@@ -30,3 +30,6 @@ model.optimize()
 print('Objective function value: %f' % model.objVal)
 for var in model.getVars():
     print('%s: %g' % (var.varName, var.x))
+
+# show graphs
+show_graphs([G, H])

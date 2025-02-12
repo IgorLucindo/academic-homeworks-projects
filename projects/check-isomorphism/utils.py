@@ -30,12 +30,23 @@ def isomorphs_graphs():
     return G, H
 
 
-# show graph
-def show_graph(G):
-    pos = nx.spring_layout(G)
+# show graphs
+def show_graphs(graphs):
+    # number of graphs
+    num_graphs = len(graphs)
+    # create subplots
+    _, axes = plt.subplots(1, num_graphs, figsize=(5 * num_graphs, 5))
 
-    # draw graph
-    nx.draw(G, pos, with_labels=True)
-    
-    # show
+    # if there's only one graph, axes will not be an array, so we wrap it in a list
+    if num_graphs == 1:
+        axes = [axes]
+
+    # iterate over the graphs and draw them
+    for i, G in enumerate(graphs):
+        pos = nx.spring_layout(G)  # Compute positions for the graph
+        nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=500, width=2, ax=axes[i])
+        axes[i].set_title(f"Graph {i + 1}")  # Set title for each subplot
+
+    # show the figure
+    plt.tight_layout()
     plt.show()
