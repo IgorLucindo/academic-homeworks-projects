@@ -7,7 +7,6 @@ from utils import *
 # create graphs
 G, H = non_isomorphs_graphs()
 # G, H = isomorphs_graphs()
-
 H_complement = nx.complement(H)
 
 # create model
