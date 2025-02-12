@@ -28,7 +28,7 @@ model.addConstrs((x[u1, v1] + x[u2, v2] + x[u1, v2] + x[u2, v1] <= 1
 # solve
 model.optimize()
 
-# print results
+# print results if feasible
 if model.status != 3:
     print('Objective function value: %f' % model.objVal)
     for var in model.getVars():
