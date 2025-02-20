@@ -1,8 +1,8 @@
 import numpy as np
 
 
-# generate instances definite matrices Q, matrices A and vectors c as instances
-def generate_instances(number_of_instances, dim):
+# generate instances definite matrices Q and A, vectors c and b as instances
+def generate_p1_instances(number_of_instances, dim):
     instances = []
     for i in range(number_of_instances):
         # random symmetric matrix
@@ -21,3 +21,18 @@ def generate_instances(number_of_instances, dim):
 
     # return instances
     return instances
+
+
+# generate problem 2 instance (ordering from supplier to distribution centers)
+def generate_p2_instance():
+    # set variables
+    # supply
+    a = [[10, 23, 13, 4, 9, 20, 15, 6, 12],
+         [3, 8, 30, 11, 6, 33, 17, 18, 9]]
+    # cost
+    c = [9, 11, 7, 8, 8, 13, 21, 16, 11]
+
+    # demand
+    d = [46, 54]
+
+    return a, c, d

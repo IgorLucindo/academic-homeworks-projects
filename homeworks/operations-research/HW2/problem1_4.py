@@ -1,5 +1,5 @@
 from utils.instance_utils import *
-from utils.solve_utils import *
+from utils.solve_p1_utils import *
 import time
 
 
@@ -8,7 +8,7 @@ def main():
     # number_of_instances = 5
     dim = 10
     # get instances as model input
-    instances = generate_instances(number_of_instances, dim)
+    instances = generate_p1_instances(number_of_instances, dim)
 
     # solve every instance using each method
     for Q, A, c, b in instances:
