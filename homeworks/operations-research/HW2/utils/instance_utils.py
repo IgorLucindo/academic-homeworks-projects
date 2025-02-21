@@ -25,14 +25,19 @@ def generate_p1_instances(number_of_instances, dim):
 
 # generate problem 2 instance (ordering from supplier to distribution centers)
 def generate_p2_instance():
-    # set variables
+    # suppliers set
+    S = range(9)
+
+    # distribution centers set
+    C = range(2)
+
     # supply
-    a = [[10, 23, 13, 4, 9, 20, 15, 6, 12],
-         [3, 8, 30, 11, 6, 33, 17, 18, 9]]
+    a = np.array([[10, 23, 13, 4, 9, 20, 15, 6, 12],
+                  [3, 8, 30, 11, 6, 33, 17, 18, 9]]).T
     # cost
     c = [9, 11, 7, 8, 8, 13, 21, 16, 11]
 
     # demand
     d = [46, 54]
 
-    return a, c, d
+    return S, C, a, c, d

@@ -5,14 +5,14 @@ import time
 
 def main():
     # get instance for solving methods
-    a, c, d = generate_p2_instance()
+    instance = generate_p2_instance()
 
     # get start time
     time0 = time.time()
 
     # solve the problem using each method
-    MasSubModel = MasterSubproblemModel()
-    x1 = MasSubModel.solve()
+    method1 = MasterSubproblemMethod(instance)
+    x1, obj_val1, opt_gap1 = method1.solve()
     time1 = time.time()
     time2 = time.time()
 
@@ -21,8 +21,7 @@ def main():
     running_time2 = time2 - time1
     
     # print results for each solver
-    print(f"running time: \n{running_time1}, \n{running_time2}\n")
-    print(f"Optimal Solution: x = {x1}")
+    print(f"\nMaster Subproblem Method:\n Running Time (s): {running_time1:.3f}\n Optimal Solution: x = {x1}\n Objective Function Value: {obj_val1}\n Optimality Gap: {opt_gap1}\n")
 
 
 if __name__ == "__main__":

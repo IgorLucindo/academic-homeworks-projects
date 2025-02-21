@@ -1,48 +1,76 @@
-from gurobipy import Model, GRB, LinExpr
+import gurobipy as gp
+from gurobipy import GRB
 
 
-class MasterSubproblemModel:
-    def __init__(self, time_limit=3600):
-        self.model = Model("master subproblem model")
-        self.model.setParam("time limit", time_limit)  # Set 1-hour time limit if needed
-        self.x = self.model.addVar(lb=0, ub=1, vtype=GRB.CONTINUOUS, name="x")  # Decision variable
-        self.model.setObjective(self.x, GRB.MINIMIZE)  # Objective function
+# master subproblem method for solving semi-infinite 
+class MasterSubproblemMethod:
+    def __init__(self, instance, time_limit=3600):
+        # set attributes
+        self.S, self.C, self.a, self.c, self.d = instance
+
+        # create master problem model
+        self.master = gp.Model("master")
+
+        # suppress output
+        self.master.setParam("OutputFlag", 0)
+
+        # 1 hour time limit for solving
+        self.master.setParam("TimeLimit", time_limit)
+
+        # add variables
+        self.x = self.master.addVars(self.S, self.C, vtype=GRB.BINARY, name="x")
+
+        # set the objective function
+        obj_fn = gp.quicksum(self.c[i] * self.x[i, j] for i in self.S for j in self.C)
+        self.master.setObjective(obj_fn, GRB.MINIMIZE)  
+
+
+
+    # solve subproblem
+    def solve_subproblem(self, x, j):
+        # create subproblem model
+        subproblem = gp.Model("subproblem")
+
+        # suppress output
+        subproblem.setParam("OutputFlag", 0)
+        
+        # add variables
+        xi = subproblem.addVars(self.S, vtype=GRB.CONTINUOUS, name="xi")
+
+        # set the objective function
+        obj_fn = gp.quicksum((self.a[i, j] + xi[i])*x[i, j] for i in self.S)
+        subproblem.setObjective(obj_fn, GRB.MINIMIZE)
+        subproblem.addConstr(gp.quicksum(xi[i]**2 for i in self.S) <= 1, "c1")
+        
+        # solve subproblem
+        subproblem.optimize()
+
+        # return solution and value of objective function
+        return [xi[i].X for i in self.S], subproblem.objVal
     
 
     def lazy_callback(self, model, where):
-        """Gurobi callback for adding lazy constraints dynamically."""
+        # add lazy constraints
         if where == GRB.Callback.MIPSOL:
-            x_val = model.cbGetSolution(self.x)  # Get current x solution
+            # get current x solution
+            x = model.cbGetSolution(self.x)
             
-            # Solve subproblem for the given x_val
-            y_val, violation = self.solve_subproblem(x_val)
-            
-            if violation > 1e-5:  # If constraint violated, add lazy cut
-                lhs = LinExpr()  # Define left-hand side of constraint
-                lhs += self.x  # Modify based on subproblem structure
-                
-                # Add the lazy constraint: example form lhs ≤ y_val
-                model.cbLazy(lhs <= y_val)
-                print(f"Added Lazy Constraint: {lhs} <= {y_val}")
+            # iterate for every constraint
+            for j in self.C:
+                # solve subproblem
+                xi, sub_prob_obj_val = self.solve_subproblem(x, j)
+
+                # add lazy constraints if solution is infeasible to master problem
+                if sub_prob_obj_val < self.d[j]:
+                    model.cbLazy(gp.quicksum((self.a[i, j] + xi[i])*self.x[i, j] for i in self.S) >= self.d[j])
+                if sub_prob_obj_val == -GRB.INFINITY:
+                    model.cbLazy(gp.quicksum((self.a[i, j] + xi[i])*self.x[i, j] for i in self.S) >= 0)
 
 
-    def solve_subproblem(self, x_val):
-        """Solve the subproblem given x_val and return y_val and violation."""
-        subproblem = Model("Subproblem")
-        subproblem.setParam("OutputFlag", 0)  # Suppress output
-        
-        y = subproblem.addVar(lb=0, vtype=GRB.CONTINUOUS, name="y")  # Subproblem variable
-        subproblem.setObjective(y + 2 * x_val, GRB.MINIMIZE)
-        subproblem.addConstr(y >= x_val, "SubConstraint")  # Example constraint
-        
-        subproblem.optimize()
-        y_val = y.X
-        violation = max(0, x_val - y_val)  # Check if constraint is violated
-        return y_val, violation
-
-
+    # solve using master subproblem method
     def solve(self):
-        """Solve the master problem with lazy constraint callback."""
-        self.model.optimize(self.lazy_callback)  # Attach callback
-        return self.x.X  # Return optimal solution
+        self.master.setParam(GRB.Param.LazyConstraints, 1)
+        self.master.optimize(self.lazy_callback)
 
+        # return optimal solution, objective funciton value and optimality gap
+        return [self.x[i, j].X for i in self.S for j in self.C], self.master.objVal, self.master.MIPGap
