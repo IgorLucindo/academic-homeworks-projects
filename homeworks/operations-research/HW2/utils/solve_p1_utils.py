@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.optimize import minimize
 
 
 # solve analyticaly from KKT Conditions method
@@ -15,7 +16,7 @@ def analytical_solver(Q, A, c, b):
 
 
 # solve by gradient descent from Lagrangian Duality method
-def gradient_descent_solver(Q, A, c, b, dim, alpha=0.01, tol=1e-6, max_iter=1000):
+def gradient_descent_solver(Q, A, c, b, alpha=0.01, tol=1e-6, max_iter=1000):
     # precompute fixed terms
     Q_inv = np.linalg.inv(Q)
     g = A@Q_inv@A.T
@@ -23,10 +24,10 @@ def gradient_descent_solver(Q, A, c, b, dim, alpha=0.01, tol=1e-6, max_iter=1000
     gradient = lambda u: g@u + h
 
     # gradient descent
-    u = np.zeros((dim, 1))
+    u = np.zeros((A.shape[0], 1))
     for i in range(max_iter):
         delta = alpha * gradient(u)
-        u -= delta
+        u += delta
         if np.linalg.norm(delta) < tol:
             break
 
@@ -38,7 +39,7 @@ def gradient_descent_solver(Q, A, c, b, dim, alpha=0.01, tol=1e-6, max_iter=1000
 
 
 # solve by newton's method from Lagrangian Duality method
-def newton_method_solver(Q, A, c, b, dim, tol=1e-6, max_iter=1000):
+def newton_method_solver(Q, A, c, b, tol=1e-6, max_iter=1000):
     # precompute fixed terms
     Q_inv = np.linalg.inv(Q)
     g = A@Q_inv@A.T
@@ -47,7 +48,7 @@ def newton_method_solver(Q, A, c, b, dim, tol=1e-6, max_iter=1000):
     H_inv = np.linalg.inv(g)
 
     # newton's method
-    u = np.zeros((dim, 1))
+    u = np.zeros((A.shape[0], 1))
     for i in range(max_iter):
         delta = H_inv @ gradient(u)
         u -= delta
@@ -62,7 +63,9 @@ def newton_method_solver(Q, A, c, b, dim, tol=1e-6, max_iter=1000):
 
 
 # solve the linear system from KKT Conditions method
-def linear_system_solver(Q, A, c, b, dim):
+def linear_system_solver(Q, A, c, b):
+    dim = A.shape[0]
+
     # get the linear system
     matrix = np.block([[Q, A.T],
                        [A, np.zeros((dim, dim))]])

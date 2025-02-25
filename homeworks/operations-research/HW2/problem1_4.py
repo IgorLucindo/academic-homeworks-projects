@@ -18,11 +18,11 @@ def main():
         # run each solver
         x1, u1 = analytical_solver(Q, A, c, b)
         time1 = time.time()
-        x2, u2 = gradient_descent_solver(Q, A, c, b, dim)
+        x2, u2 = gradient_descent_solver(Q, A, c, b)
         time2 = time.time()
-        x3, u3 = newton_method_solver(Q, A, c, b, dim)
+        x3, u3 = newton_method_solver(Q, A, c, b)
         time3 = time.time()
-        x4, u4 = linear_system_solver(Q, A, c, b, dim)
+        x4, u4 = linear_system_solver(Q, A, c, b)
         time4 = time.time()
 
         # get running time of each solver

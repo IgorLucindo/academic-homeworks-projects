@@ -90,13 +90,14 @@ def dualization_solver(instance, time_limit=3600):
 
     # add variables
     x = model.addVars(S, C, vtype=GRB.BINARY, name="x")
+    u = model.addVar(vtype=GRB.CONTINUOUS, lb=0, name="u")
 
     # set the objective function
     obj_fn = gp.quicksum(c[i] * x[i, j] for i in S for j in C)
     model.setObjective(obj_fn, GRB.MINIMIZE)
 
     # add constraints
-    model.addConstrs((gp.quicksum(a[i, j]*x[i, j] for i in S) >= d[j] for j in C), name="c1")
+    model.addConstrs((gp.quicksum((a[i, j] - x[i, j]/4/u)*x[i, j] for i in S) - u >= d[j] for j in C), name="c1")
 
     # solve
     model.optimize()
