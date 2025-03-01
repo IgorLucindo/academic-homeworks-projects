@@ -4,8 +4,7 @@ import time
 
 
 def main():
-    number_of_instances = 1
-    # number_of_instances = 5
+    number_of_instances = 5
     dim = 10
     # get instances as model input
     instances = generate_p1_instances(number_of_instances, dim)
