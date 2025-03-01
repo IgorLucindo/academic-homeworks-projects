@@ -35,7 +35,7 @@ class MasterSubproblemMethod:
         subproblem.setParam("OutputFlag", 0)
         
         # add variables
-        xi = subproblem.addVars(self.S, vtype=GRB.CONTINUOUS, name="xi")
+        xi = subproblem.addVars(self.S, vtype=GRB.CONTINUOUS, lb=-GRB.INFINITY, name="xi")
 
         # set the objective function
         obj_fn = gp.quicksum((self.a[i, j] + xi[i])*x[i, j] for i in self.S)
@@ -59,6 +59,7 @@ class MasterSubproblemMethod:
             for j in self.C:
                 # solve subproblem
                 xi, sub_prob_obj_val = self.solve_subproblem(x, j)
+                print(xi)
 
                 # add lazy constraints if solution is infeasible to master problem
                 if sub_prob_obj_val < self.d[j]:
@@ -91,13 +92,17 @@ def dualization_solver(instance, time_limit=3600):
     # add variables
     x = model.addVars(S, C, vtype=GRB.BINARY, name="x")
     u = model.addVar(vtype=GRB.CONTINUOUS, lb=0, name="u")
+    v = model.addVar(vtype=GRB.CONTINUOUS, lb=0, name="v")
+    w = model.addVars(S, C, vtype=GRB.CONTINUOUS, lb=0, name="w")
 
     # set the objective function
     obj_fn = gp.quicksum(c[i] * x[i, j] for i in S for j in C)
     model.setObjective(obj_fn, GRB.MINIMIZE)
 
     # add constraints
-    model.addConstrs((gp.quicksum((a[i, j] - x[i, j]/4/u)*x[i, j] for i in S) - u >= d[j] for j in C), name="c1")
+    model.addConstrs((gp.quicksum((a[i, j] - w[i, j])*x[i, j] for i in S) - u >= d[j] for j in C), name="c1")
+    model.addConstr(v * u == 0.25, name="c2")
+    model.addConstrs((w[i, j] == v * x[i, j] for i in S for j in C), name="c3")
 
     # solve
     model.optimize()

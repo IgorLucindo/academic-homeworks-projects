@@ -11,31 +11,38 @@ def analytical_solver(Q, A, c, b):
     # get value of x based on u
     x = -Q_inv@(c + A.T@u)
 
+    # objective function value
+    value = 0.5*x.T@Q@x + c.T@x
+
     # return variables x and u
-    return x, u
+    return x, u, value.item()
 
 
 # solve by gradient descent from Lagrangian Duality method
-def gradient_descent_solver(Q, A, c, b, alpha=0.01, tol=1e-6, max_iter=1000):
+def gradient_descent_solver(Q, A, c, b):
+    c = c.flatten()
+    b = b.flatten()
+
     # precompute fixed terms
     Q_inv = np.linalg.inv(Q)
     g = A@Q_inv@A.T
     h = A@Q_inv@c + b
+    l = 0.5*c.T@Q_inv@c
+    function = lambda u: 0.5*np.dot(g@u, u) + np.dot(u, h) + l
     gradient = lambda u: g@u + h
 
     # gradient descent
-    u = np.zeros((A.shape[0], 1))
-    for i in range(max_iter):
-        delta = alpha * gradient(u)
-        u += delta
-        if np.linalg.norm(delta) < tol:
-            break
+    res = minimize(fun=function, x0=np.zeros(A.shape[0]), jac=gradient, method='BFGS')
+    u = res.x
 
     # get value of x based on u
     x = -Q_inv@(c + A.T@u)
 
+    # objective function value
+    value = 0.5*np.dot(x, Q@x) + np.dot(c, x)
+
     # return variables x and u
-    return x, u
+    return x, u, value
 
 
 # solve by newton's method from Lagrangian Duality method
@@ -58,8 +65,11 @@ def newton_method_solver(Q, A, c, b, tol=1e-6, max_iter=1000):
     # get value of x based on u
     x = -Q_inv@(c + A.T@u)
 
+    # objective function value
+    value = 0.5*x.T@Q@x + c.T@x
+
     # return variables x and u
-    return x, u
+    return x, u, value.item()
 
 
 # solve the linear system from KKT Conditions method
@@ -74,7 +84,10 @@ def linear_system_solver(Q, A, c, b):
 
     # solve and get variables vector
     variables = np.linalg.solve(matrix, vector)
+    x, u = np.split(variables, [dim])
+
+    # objective function value
+    value = 0.5*x.T@Q@x + c.T@x
 
     # return variables x and u
-    x, u = np.split(variables, [dim])
-    return x, u
+    return x, u, value.item()
