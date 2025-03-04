@@ -59,7 +59,6 @@ class MasterSubproblemMethod:
             for j in self.C:
                 # solve subproblem
                 xi, sub_prob_obj_val = self.solve_subproblem(x, j)
-                print(xi)
 
                 # add lazy constraints if solution is infeasible to master problem
                 if sub_prob_obj_val < self.d[j]:
