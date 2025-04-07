@@ -10,12 +10,12 @@ flags = {
 
 def main():
     # Get graphs
-    graphs = get_random_graphs(n=5, m=8, num_graphs=1)
+    graphs = get_random_graphs(n=8, m=13, num_graphs=1)
 
     for G in graphs:
         # Solve shortest path
-        # solve_shortest_path(G)
-        pass
+        paths = solve_shortest_paths(G)
+        print(f"path: {paths}")
 
     show_graphs(graphs, flags['plot'])
 
