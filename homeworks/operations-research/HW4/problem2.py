@@ -1,6 +1,6 @@
 from utils.instance_utils import *
 from utils.solve_utils import *
-from utils.results_utils import *
+from utils.graph_utils import *
 
 
 # parameter flags
@@ -10,7 +10,7 @@ flags = {
 
 
 def main():
-    # Get graphs
+    # Get random connected graphs
     graphs = get_random_graphs(n=8, m=13, num_graphs=5)
 
     for G in graphs:

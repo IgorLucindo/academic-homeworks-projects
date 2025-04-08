@@ -1,5 +1,4 @@
 from itertools import product
-import numpy as np
 
 
 def _get_shortest_path_optimal_policy(G):
@@ -48,42 +47,3 @@ def solve_shortest_paths(G):
     pi = _get_shortest_path_optimal_policy(G)
     
     return [_shortest_path(G, v, pi) for v in G.nodes if v != 't']
-
-
-def left(a):
-    return [-a[1], a[0]]
-
-
-def right(a):
-    return [a[1], -a[0]]
-
-
-def P(s_prime, s, a):
-    sa = np.add(s, a)
-    sa_left = np.add(sa, left(a))
-    sa_right = np.add(sa, right(a))
-
-    if np.array_equal(s_prime, sa):
-        return 0.8
-    elif np.array_equal(s_prime, sa_left):
-        return 0.1
-    elif np.array_equal(s_prime, sa_right):
-        return 0.1
-    else:
-        return 0.0
-
-
-def solve_grid_world(grid):
-    """
-    Return optimal policy of grid world obtained by using the policy iteration method
-    """
-    # Setup
-    mask = ~np.isnan(grid)
-    S = np.array(np.nonzero(mask)).T
-    A = [[0, 1], [0, -1], [1, 0], [-1, 0]]
-
-    # Initialization
-    V = {s: 0 for s in S}
-    pi = {s: A[0] for s in S}
-
-    return V, pi
