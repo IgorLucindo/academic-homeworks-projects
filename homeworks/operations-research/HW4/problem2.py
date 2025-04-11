@@ -3,7 +3,7 @@ from utils.solve_utils import *
 from utils.graph_utils import *
 
 
-# parameter flags
+# Set parameter flags
 flags = {
     'plot': True
 }
