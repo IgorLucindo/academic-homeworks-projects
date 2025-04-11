@@ -1,5 +1,5 @@
 from utils.instance_utils import *
-from classes.gridWorld import *
+from classes.GridWorld import *
 
 
 # parameter flags
