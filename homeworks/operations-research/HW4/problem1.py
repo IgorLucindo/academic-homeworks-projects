@@ -4,7 +4,7 @@ from utils.solve_utils import *
 
 # Set parameter flags
 flags = {
-    'plot': False
+    'plot': True
 }
 
 
