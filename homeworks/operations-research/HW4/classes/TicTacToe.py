@@ -13,8 +13,10 @@ class TicTacToe():
         self.flags = flags
         
         self.remaining_plays = initial_board.count('')
-        self.player = 'X' if self.remaining_plays % 2 == 1 else 'O'
+        self.first_player = 'X' if self.remaining_plays % 2 == 1 else 'O'
+        self.player = self.first_player
         self.successor = {}
+        self.board_result = {}
 
         # Set boards
         self.set_boards()
@@ -27,6 +29,10 @@ class TicTacToe():
         for i in range(self.remaining_plays):
             self._set_layer_boards(i)
             self._toggle_player()
+        
+        # Set draw results
+        for b in self.boards[-1]:
+            self.board_result[b] = 0
 
             
     def _set_layer_boards(self, layer):
@@ -38,8 +44,10 @@ class TicTacToe():
         # Get next boards
         for b in self.boards[layer]:
             # Check if game ended
-            if self._is_terminal(b):
+            terminated, result = self._is_terminal(b)
+            if terminated:
                 self.successor[b] = set()
+                self.board_result[b] = result
                 continue
 
             possible_boards = self._next_boards(b)
@@ -80,12 +88,9 @@ class TicTacToe():
 
         for i, j, k in lines:
             if b[i] != '' and b[i] == b[j] == b[k]:
-                return True  # Win detected
-        
-        if '' not in b:
-            return True  # Draw (no empty spots)
+                return True, 1 if b[i] == self.first_player else -1  # Win detected
 
-        return False  # Game is still going
+        return False, 0  # Game is still going
     
 
     def _get_canonical(self, b):

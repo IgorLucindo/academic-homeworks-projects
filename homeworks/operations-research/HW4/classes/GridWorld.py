@@ -94,18 +94,12 @@ class GridWorld:
         i = 0
         while i < max_iterations:
             i += 1
-
             # Policy evaluation
-            while True:
-                delta = 0
-                for s in self.S:
-                    previous_value = self.V[s]
-                    self.V[s] = self._update_value(s, self.pi[s])
-                    delta = max(delta, abs(previous_value - self.V[s]))
-                if delta < self.theta:
-                    break
-            # for s in self.S:
-            #     self.V[s] = self._update_value(s, self.pi[s])
+            delta = 0
+            for s in self.S:
+                previous_value = self.V[s]
+                self.V[s] = self._update_value(s, self.pi[s])
+                delta = max(delta, abs(previous_value - self.V[s]))
 
             # Policy improvement
             policy_stable = True
@@ -116,7 +110,8 @@ class GridWorld:
                 if previous_pi != self.pi[s]:
                     policy_stable = False
 
-            if policy_stable:
+            # Stop in convergence
+            if policy_stable and delta < self.theta:
                 print(f"necessary iterations: {i}")
                 return
 
@@ -148,7 +143,8 @@ class GridWorld:
             if np.isnan(val):
                 ax.add_patch(plt.Rectangle((i - 0.5, j - 0.5), 1, 1, color='black'))
                 continue
-
+            
+            ax.text(i, j - 0.35, f"V = {self.V[(i, j)]:.3}", va='top', ha='center', fontsize=12, color='black')
             if val > 0:
                 ax.add_patch(plt.Rectangle((i - 0.5, j - 0.5), 1, 1, color='#44AA44'))
             elif val < 0:

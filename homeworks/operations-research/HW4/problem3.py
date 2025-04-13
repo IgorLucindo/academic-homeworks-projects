@@ -13,7 +13,7 @@ def main():
     grid = create_grid_world()
 
     # Create grid world class
-    gw = GridWorld(grid, flags, gamma=0.1)
+    gw = GridWorld(grid, flags, gamma=0.4)
 
     # Solve grid world
     gw.solve_grid_world()
