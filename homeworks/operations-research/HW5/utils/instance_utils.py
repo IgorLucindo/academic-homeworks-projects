@@ -4,7 +4,7 @@ import numpy as np
 
 def get_shipping_instance(num_samples=1e4):
     """
-    Return instance for the minimum expected total cost
+    Return instance for the shipping problem
     """
     s = [100, 80, 120]
     S = range(len(s))
@@ -18,13 +18,35 @@ def get_shipping_instance(num_samples=1e4):
     ]
 
     # Generate samples (each column is a variable)
-    data = np.column_stack([dist.rvs(size=int(num_samples)) for dist in c_dist])
+    cost = np.column_stack([dist.rvs(size=int(num_samples)) for dist in c_dist])
 
-    # Apply transformation: 5 + 3 * Beta(2, 2) for the second column
-    data[:, 1] = 5 + 3 * data[:, 1]
+    # Apply transformation: 5 + 3*Beta(2, 2) for the second column
+    cost[:, 1] = 5 + 3*cost[:, 1]
 
-    # Compute empirical mean and covariance
-    mean = np.mean(data, axis=0)
-    sigma = np.cov(data, rowvar=False)
+    return s, S, _beta, cost
 
-    return s, S, _beta, mean, sigma
+
+def get_ordering_instance(num_samples=50):
+    """
+    Return instance for ordering problem
+    """
+    # Set of suppliers
+    S = range(9)
+
+    # Set of distribution centers
+    C = range(2)
+
+    # Capacity
+    a = np.array([[10, 23, 13, 4, 9, 20, 15, 6, 12],
+                  [3, 8, 30, 11, 6, 33, 17, 18, 9]]).T
+    # Cost
+    c = [9, 11, 7, 8, 8, 13, 21, 16, 11]
+
+    # Demand
+    d_dist = [
+        uniform(loc=5, scale=3),
+        triang(c=32/35, loc=35, scale=35)
+    ]
+    d = np.column_stack([dist.rvs(size=num_samples) for dist in d_dist])
+
+    return S, C, a, c, d
